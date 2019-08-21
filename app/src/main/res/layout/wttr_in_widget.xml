@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_wttr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E000"
+    android:background="#A000"
     android:padding="@dimen/widget_margin">
-
 
     <TextView
         android:id="@+id/tv_wttr"
@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@android:color/primary_text_dark"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         tools:text="Nuremberg: 🌦 +11⁰C" />
 
