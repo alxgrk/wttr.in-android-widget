@@ -20,6 +20,7 @@
         <receiver android:name=".WttrInWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="de.alxgrk.wttrinwidget.action.TOGGLE_ICONS" />
             </intent-filter>
 
             <meta-data

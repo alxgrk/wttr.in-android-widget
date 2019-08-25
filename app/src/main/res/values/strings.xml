@@ -3,4 +3,6 @@
     <string name="location">Location</string>
     <string name="btn_save">Save</string>
     <string name="image_content_description">wttr.in image</string>
+    <string name="settings_content_description">settings</string>
+    <string name="sync_content_description">sync</string>
 </resources>

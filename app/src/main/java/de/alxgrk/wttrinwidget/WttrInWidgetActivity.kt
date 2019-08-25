@@ -38,7 +38,13 @@ class WttrInWidgetActivity : Activity() {
 
             // It is the responsibility of the configuration activity to update the app widget
             val appWidgetManager = AppWidgetManager.getInstance(this)
-            WttrInWidget.updateAppWidget(this, appWidgetManager, appWidgetId, wttrRepository)
+            WttrInWidget.updateAppWidget(
+                this,
+                appWidgetManager,
+                appWidgetId,
+                wttrRepository,
+                PendingIntentCreator(this, appWidgetId)
+            )
 
             // Make sure we pass back the original appWidgetId
             Intent().apply {
