@@ -8,6 +8,7 @@ import android.util.Log
 import coil.ImageLoader
 import coil.api.get
 import coil.transform.RoundedCornersTransformation
+import java.util.concurrent.CancellationException
 
 private const val LOG_TAG = "Repository"
 private const val PREFS_NAME = "de.alxgrk.wttrinwidget.WttrInWidget"
@@ -20,7 +21,7 @@ class WttrRepository(
 
     private val syncProblemImage: Drawable = context.resources.getDrawable(R.drawable.ic_sync_problem)
 
-    suspend fun getWttrFor(location: String): Wttr {
+    suspend fun getWttrFor(location: String, withForecast: Boolean = false): Wttr {
 
         // check network state
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -30,8 +31,7 @@ class WttrRepository(
             return Wttr(syncProblemImage)
         }
 
-
-        val url = "https://wttr.in/${location}_0tqp.png"
+        val url = "https://wttr.in/${location}_${if (withForecast) 1 else 0}tqp.png"
 
         Log.d(LOG_TAG, "requesting $url")
 
@@ -41,8 +41,14 @@ class WttrRepository(
             }
         }
 
-        if (imageResult.isFailure)
-            Log.e(LOG_TAG, "could not retrieve wttr image, ${imageResult.exceptionOrNull()}")
+        if (imageResult.isFailure) {
+            val e = imageResult.exceptionOrNull()
+
+            Log.e(LOG_TAG, "could not retrieve wttr image, $e")
+
+            if (e != null && e is CancellationException)
+                throw e
+        }
 
         val image = imageResult.getOrDefault(syncProblemImage)
 

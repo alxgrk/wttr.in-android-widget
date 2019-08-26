@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
 
 const val ICONS_SHOWN_KEY = "areIconsShown"
@@ -36,13 +35,14 @@ abstract class AppWidgetBroadcastReceiver : BroadcastReceiver() {
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
-        newOptions: Bundle
+        minWidth: Int,
+        maxWidth: Int,
+        minHeight: Int,
+        maxHeight: Int
     ) {
         Log.d(
             LOG_TAG,
-            "widget resized to minWidth=${newOptions.getFloat(OPTION_APPWIDGET_MIN_WIDTH)}<->maxWidth=${newOptions
-                .getFloat(OPTION_APPWIDGET_MAX_WIDTH)} & minHeight=${newOptions
-                .getFloat(OPTION_APPWIDGET_MIN_HEIGHT)}<->maxHeight=${newOptions.getFloat(OPTION_APPWIDGET_MAX_HEIGHT)}"
+            "widget resized to minWidth=$minWidth<->maxWidth=$maxWidth & minHeight=$minHeight<->maxHeight=$minHeight"
         )
     }
 
@@ -102,9 +102,15 @@ abstract class AppWidgetBroadcastReceiver : BroadcastReceiver() {
                     if (extras.containsKey(EXTRA_APPWIDGET_ID) && extras.containsKey(EXTRA_APPWIDGET_OPTIONS)) {
                         val appWidgetId = extras.getInt(EXTRA_APPWIDGET_ID)
                         val widgetExtras = extras.getBundle(EXTRA_APPWIDGET_OPTIONS)
+
+                        val minWidth = widgetExtras?.getInt(OPTION_APPWIDGET_MIN_WIDTH) ?: 0
+                        val maxWidth = widgetExtras?.getInt(OPTION_APPWIDGET_MAX_WIDTH) ?: 0
+                        val minHeight = widgetExtras?.getInt(OPTION_APPWIDGET_MIN_HEIGHT) ?: 0
+                        val maxHeight = widgetExtras?.getInt(OPTION_APPWIDGET_MAX_HEIGHT) ?: 0
+
                         this.onAppWidgetOptionsChanged(
                             context, getInstance(context),
-                            appWidgetId, widgetExtras ?: Bundle.EMPTY
+                            appWidgetId, minWidth, maxWidth, minHeight, maxHeight
                         )
                     }
                 }

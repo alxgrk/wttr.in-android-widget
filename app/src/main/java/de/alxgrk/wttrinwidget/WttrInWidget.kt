@@ -6,9 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.graphics.drawable.toBitmap
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 private const val LOG_TAG = "Widget"
 
@@ -66,6 +64,24 @@ class WttrInWidget : AppWidgetBroadcastReceiver() {
         }
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        minWidth: Int,
+        maxWidth: Int,
+        minHeight: Int,
+        maxHeight: Int
+    ) {
+        super.onAppWidgetOptionsChanged(
+            context, appWidgetManager, appWidgetId, minWidth, maxWidth, minHeight, maxHeight
+        )
+
+        val views = RemoteViews(context.packageName, R.layout.wttr_in_widget)
+        views.setWttrToImageView(appWidgetManager, appWidgetId, context, minWidth)
+
+    }
+
     companion object {
 
         internal fun updateAppWidget(
@@ -84,14 +100,12 @@ class WttrInWidget : AppWidgetBroadcastReceiver() {
 
             // Construct the RemoteViews object
             val views = RemoteViews(context.packageName, R.layout.wttr_in_widget)
+            views.setImageViewResource(R.id.iv_wttr, R.drawable.ic_waiting)
 
             // request and display wttr
-            views.setImageViewResource(R.id.iv_wttr, R.drawable.ic_waiting)
-            CoroutineScope(Dispatchers.IO).launch {
-                val wttr = wttrRepository.getWttrFor(location)
-                views.setImageViewBitmap(R.id.iv_wttr, wttr.wttrImage.toBitmap())
-                appWidgetManager.updateAppWidget(appWidgetId, views)
-            }
+            val minWidth = appWidgetManager.getAppWidgetOptions(appWidgetId)
+                .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+            views.setWttrToImageView(appWidgetManager, appWidgetId, context, minWidth, wttrRepository, location)
 
             // ICONS
             views.setViewVisibility(R.id.iv_settings, View.GONE)
@@ -109,6 +123,25 @@ class WttrInWidget : AppWidgetBroadcastReceiver() {
             // Instruct the widget manager to update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
+
+        private fun RemoteViews.setWttrToImageView(
+            appWidgetManager: AppWidgetManager,
+            appWidgetId: Int,
+            context: Context,
+            minWidth: Int,
+            wttrRepository: WttrRepository = WttrRepository(context),
+            location: String = wttrRepository.loadLocation(appWidgetId)
+        ) {
+            wttrJob?.cancel("cancel running job before launching new one")
+            wttrJob = CoroutineScope(Dispatchers.IO).launch {
+                val withForecast = minWidth > 200
+                val wttr = wttrRepository.getWttrFor(location, withForecast)
+                setImageViewBitmap(R.id.iv_wttr, wttr.wttrImage.toBitmap())
+                appWidgetManager.partiallyUpdateAppWidget(appWidgetId, this@setWttrToImageView)
+            }
+        }
+
+        private var wttrJob: Job? = null
 
     }
 
