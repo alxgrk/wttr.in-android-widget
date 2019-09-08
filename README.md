@@ -13,4 +13,4 @@ The most common view of the app widget will probably be a small overview for one
 
 However, if the size of the app widget changes, a more detailed view will be loaded automatically:
 
-![resizing](.github/Video_Resizing.webm "Resizing")
+![resizing](.github/Video_Resizing.gif "Resizing")
