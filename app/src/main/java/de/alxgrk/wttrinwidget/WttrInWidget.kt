@@ -78,7 +78,7 @@ class WttrInWidget : AppWidgetBroadcastReceiver() {
         )
 
         val views = RemoteViews(context.packageName, R.layout.wttr_in_widget)
-        views.setWttrToImageView(appWidgetManager, appWidgetId, context, minWidth)
+        views.setWttrToImageView(appWidgetManager, appWidgetId, context, minWidth, minHeight)
 
     }
 
@@ -105,7 +105,12 @@ class WttrInWidget : AppWidgetBroadcastReceiver() {
             // request and display wttr
             val minWidth = appWidgetManager.getAppWidgetOptions(appWidgetId)
                 .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            views.setWttrToImageView(appWidgetManager, appWidgetId, context, minWidth, wttrRepository, location)
+            val minHeight = appWidgetManager.getAppWidgetOptions(appWidgetId)
+                .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+            views.setWttrToImageView(
+                appWidgetManager, appWidgetId, context,
+                minWidth, minHeight, wttrRepository, location
+            )
 
             // ICONS
             views.setViewVisibility(R.id.iv_settings, View.GONE)
@@ -129,13 +134,19 @@ class WttrInWidget : AppWidgetBroadcastReceiver() {
             appWidgetId: Int,
             context: Context,
             minWidth: Int,
+            minHeight: Int,
             wttrRepository: WttrRepository = WttrRepository(context),
             location: String = wttrRepository.loadLocation(appWidgetId)
         ) {
             wttrJob?.cancel("cancel running job before launching new one")
             wttrJob = CoroutineScope(Dispatchers.IO).launch {
-                val withForecast = minWidth > 200
-                val wttr = wttrRepository.getWttrFor(location, withForecast)
+                val forecastLevel = when {
+                    minWidth in 0..200 -> ForecastLevel.ZERO
+                    minHeight in 0..100 -> ForecastLevel.ONE
+                    minHeight in 101..150 -> ForecastLevel.TWO
+                    else -> ForecastLevel.THREE
+                }
+                val wttr = wttrRepository.getWttrFor(location, forecastLevel)
                 setImageViewBitmap(R.id.iv_wttr, wttr.wttrImage.toBitmap())
                 appWidgetManager.partiallyUpdateAppWidget(appWidgetId, this@setWttrToImageView)
             }

@@ -21,7 +21,7 @@ class WttrRepository(
 
     private val syncProblemImage: Drawable = context.resources.getDrawable(R.drawable.ic_sync_problem)
 
-    suspend fun getWttrFor(location: String, withForecast: Boolean = false): Wttr {
+    suspend fun getWttrFor(location: String, forecastLevel: ForecastLevel = ForecastLevel.ZERO): Wttr {
 
         // check network state
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -31,7 +31,7 @@ class WttrRepository(
             return Wttr(syncProblemImage)
         }
 
-        val url = "https://wttr.in/${location}_${if (withForecast) 1 else 0}tqp.png"
+        val url = "https://wttr.in/${location}_${forecastLevel.asNumber}tqp.png"
 
         Log.d(LOG_TAG, "requesting $url")
 
@@ -75,3 +75,10 @@ class WttrRepository(
 }
 
 data class Wttr(val wttrImage: Drawable)
+
+enum class ForecastLevel(val asNumber: Int) {
+    ZERO(0),
+    ONE(1),
+    TWO(2),
+    THREE(3)
+}

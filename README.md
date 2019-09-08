@@ -11,6 +11,6 @@ The most common view of the app widget will probably be a small overview for one
 
 ![small overview](.github/Screenshot_Small.png "Small Overview")
 
-However, if the size of the app widget changes, a more detailed view will be loaded:
+However, if the size of the app widget changes, a more detailed view will be loaded automatically:
 
-![detailed view](.github/Screenshot_Detailed_View.png "Detailed View")
+![resizing](.github/Video_Resizing.webm "Resizing")
